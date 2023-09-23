@@ -1,20 +1,20 @@
 import { Request, Response } from "express";
 import { prismaClient } from "../database/prismaClient";
 
-export class EsporteController {
+export class EquipeController {
   async index(request: Request, response: Response) {
-    const data = await prismaClient.esporte.findMany();
+    const data = await prismaClient.equipe.findMany();
 
     if (!data.length) {
-      return response.status(404).json("Nenhum esporte encontrado");
+      return response.status(404).json("Nenhuma equipe encontrada");
     }
     return response.json(data);
   }
 
   async store(request: Request, response: Response) {
-    const { nome, descricao } = request.body;
+    const { nome, descricao, id_esporte } = request.body;
 
-    if (!nome || !descricao) {
+    if (!nome || !descricao || !id_esporte) {
       return response.status(400).json({
         Erro: "Parâmetros ausentes",
         Mensagem:
@@ -22,10 +22,11 @@ export class EsporteController {
       });
     }
 
-    const data = await prismaClient.esporte.create({
+    const data = await prismaClient.equipe.create({
       data: {
         nome,
         descricao,
+        id_esporte,
       },
     });
 
@@ -34,7 +35,7 @@ export class EsporteController {
 
   async show(request: Request, response: Response) {
     const { id } = request.params;
-    const data = await prismaClient.esporte.findUnique({
+    const data = await prismaClient.equipe.findUnique({
       where: {
         id,
       },
@@ -47,7 +48,7 @@ export class EsporteController {
     const { id } = request.params;
     const body = request.body;
 
-    const data = await prismaClient.esporte.update({
+    const data = await prismaClient.equipe.update({
       where: {
         id,
       },
@@ -59,12 +60,12 @@ export class EsporteController {
 
   async destroy(request: Request, response: Response) {
     const { id } = request.params;
-    await prismaClient.esporte.delete({
+    await prismaClient.equipe.delete({
       where: {
         id,
       },
     });
 
-    return response.status(200).json("Esporte deletado com sucesso");
+    return response.status(200).json("Equipe deletada com sucesso");
   }
 }

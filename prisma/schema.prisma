@@ -8,9 +8,20 @@ datasource db {
 }
 
 model Esporte {
-  id        String @id @default(uuid())
-  nome      String @unique
+  id        String   @id @default(uuid())
+  nome      String   @unique
   descricao String
+  Equipe    Equipe[]
 
   @@map("esportes")
+}
+
+model Equipe {
+  id         String  @id @default(uuid())
+  nome       String
+  descricao  String
+  id_esporte String
+  esporte    Esporte @relation(fields: [id_esporte], references: [id])
+
+  @@map("equipes")
 }
