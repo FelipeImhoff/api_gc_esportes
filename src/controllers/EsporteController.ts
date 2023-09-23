@@ -22,4 +22,15 @@ export class EsporteController {
         
         return response.status(201).json(data)
     }
+    
+    async show(request: Request, response: Response){
+        const {id} =  request.params;
+        const data = await prismaClient.esporte.findUnique({
+            where: {
+                id
+            }
+        })
+        
+        return response.json(data)
+    }
 }

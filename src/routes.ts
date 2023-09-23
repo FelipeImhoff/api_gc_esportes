@@ -7,6 +7,7 @@ const esporteController = new EsporteController()
 const esporteRouter = Router();
 esporteRouter.get('/', esporteController.index);
 esporteRouter.post('/', esporteController.store);
+esporteRouter.get('/:id', esporteController.show);
 
 //outras rotas aqui
 
