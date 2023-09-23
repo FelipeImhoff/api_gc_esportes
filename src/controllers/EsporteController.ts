@@ -3,11 +3,23 @@ import { prismaClient } from "../database/prismaClient";
 
 export class EsporteController {
     async index(request: Request, response: Response){
-        const esportes = await prismaClient.esporte.findMany();
+        const data = await prismaClient.esporte.findMany();
         
-        if(!esportes.length){
+        if(!data.length){
             return response.status(404).json("No esportes found")
         }
-        return response.json(esportes)
+        return response.json(data)
+    }
+    
+    async store(request: Request, response: Response){
+        const { nome, descricao } = request.body;
+        const data = await prismaClient.esporte.create({
+            data: {
+                nome,
+                descricao
+            }
+        })
+        
+        return response.status(201).json(data)
     }
 }
