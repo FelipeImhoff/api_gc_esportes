@@ -9,6 +9,7 @@ esporteRouter.get("/", esporteController.index);
 esporteRouter.post("/", esporteController.store);
 esporteRouter.get("/:id", esporteController.show);
 esporteRouter.put("/:id", esporteController.update);
+esporteRouter.delete("/:id", esporteController.destroy);
 
 //outras rotas aqui
 

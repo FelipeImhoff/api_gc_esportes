@@ -56,4 +56,15 @@ export class EsporteController {
 
     return response.json(data);
   }
+
+  async destroy(request: Request, response: Response) {
+    const { id } = request.params;
+    await prismaClient.esporte.delete({
+      where: {
+        id,
+      },
+    });
+
+    return response.status(200).json("Esporte deletado com sucesso");
+  }
 }
