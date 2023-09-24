@@ -18,18 +18,19 @@ model Esporte {
 }
 
 model Equipe {
-  id         String  @id @default(uuid())
-  nome       String
-  descricao  String
-  id_esporte String
-  esporte    Esporte @relation(fields: [id_esporte], references: [id])
+  id               String             @id @default(uuid())
+  nome             String
+  descricao        String
+  id_esporte       String
+  esporte          Esporte            @relation(fields: [id_esporte], references: [id])
+  equipeCampeonato equipeCampeonato[]
 
   @@map("equipes")
 }
 
-//Faltou adicionar usuario
+//Adicionar usuario depois de criar a tabela de usuários
 model Campeonato {
-  id                    String   @id @default(uuid())
+  id                    String             @id @default(uuid())
   nome                  String
   descricao             String
   legenda               String
@@ -42,7 +43,18 @@ model Campeonato {
   endereco              String
   bairro                String
   cidade                String
-  esporte               Esporte  @relation(fields: [id_esporte], references: [id])
+  esporte               Esporte            @relation(fields: [id_esporte], references: [id])
+  equipeCampeonato      equipeCampeonato[]
 
   @@map("campeonatos")
+}
+
+model equipeCampeonato {
+  id            String     @id @default(uuid())
+  id_equipe     String
+  id_campeonato String
+  equipe        Equipe     @relation(fields: [id_equipe], references: [id])
+  campeonato    Campeonato @relation(fields: [id_campeonato], references: [id])
+
+  @@map("equipes_campeonatos")
 }
