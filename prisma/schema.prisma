@@ -8,10 +8,11 @@ datasource db {
 }
 
 model Esporte {
-  id        String   @id @default(uuid())
-  nome      String   @unique
-  descricao String
-  Equipe    Equipe[]
+  id          String       @id @default(uuid())
+  nome        String       @unique
+  descricao   String
+  Equipe      Equipe[]
+  Campeonatos Campeonato[]
 
   @@map("esportes")
 }
@@ -24,4 +25,24 @@ model Equipe {
   esporte    Esporte @relation(fields: [id_esporte], references: [id])
 
   @@map("equipes")
+}
+
+//Faltou adicionar usuario
+model Campeonato {
+  id                    String   @id @default(uuid())
+  nome                  String
+  descricao             String
+  legenda               String
+  id_esporte            String
+  total_atletas_equipes Int
+  total_equipes         Int
+  data_inicio_inscricao DateTime
+  data_final_inscricao  DateTime
+  horario               String
+  endereco              String
+  bairro                String
+  cidade                String
+  esporte               Esporte  @relation(fields: [id_esporte], references: [id])
+
+  @@map("campeonatos")
 }
