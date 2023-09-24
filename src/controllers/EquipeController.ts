@@ -3,7 +3,11 @@ import { prismaClient } from "../database/prismaClient";
 
 export class EquipeController {
   async index(request: Request, response: Response) {
-    const data = await prismaClient.equipe.findMany();
+    const data = await prismaClient.equipe.findMany({
+      include: {
+        esporte: true,
+      },
+    });
 
     if (!data.length) {
       return response.status(404).json("Nenhuma equipe encontrada");
@@ -28,6 +32,9 @@ export class EquipeController {
         descricao,
         id_esporte,
       },
+      include: {
+        esporte: true,
+      },
     });
 
     return response.status(201).json(data);
@@ -38,6 +45,9 @@ export class EquipeController {
     const data = await prismaClient.equipe.findUnique({
       where: {
         id,
+      },
+      include: {
+        esporte: true,
       },
     });
 
@@ -51,6 +61,9 @@ export class EquipeController {
     const data = await prismaClient.equipe.update({
       where: {
         id,
+      },
+      include: {
+        esporte: true,
       },
       data: body,
     });
