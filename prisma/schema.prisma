@@ -74,7 +74,7 @@ model Usuario {
   id            String          @id @default(uuid())
   id_google     String
   nome          String
-  email         String
+  email         String          @unique
   avatar        String
   equipeUsuario equipeUsuario[]
 

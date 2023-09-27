@@ -3,12 +3,16 @@ import { EsporteController } from "./controllers/EsporteController";
 import { EquipeController } from "./controllers/EquipeController";
 import { CampeonatoController } from "./controllers/CampeonatoController";
 import { EquipeCampeonatoController } from "./controllers/EquipeCampeonatoController";
+import { UsuarioController } from "./controllers/UsuarioController";
+
+import { routesAuthentication } from "./middlewares/authentication/routes_authentication";
 
 const router = Router();
 const esporteController = new EsporteController();
 const equipeController = new EquipeController();
 const campeonatoController = new CampeonatoController();
 const equipeCampeonatoController = new EquipeCampeonatoController();
+const usuarioController = new UsuarioController();
 
 const esporteRouter = Router();
 esporteRouter.get("/", esporteController.index);
@@ -38,10 +42,20 @@ equipeCampeonatoRouter.get("/:id", equipeCampeonatoController.show);
 equipeCampeonatoRouter.put("/:id", equipeCampeonatoController.update);
 equipeCampeonatoRouter.delete("/:id", equipeCampeonatoController.destroy);
 
+// Criei as rotas de usuario
+const usuarioRouter = Router();
+usuarioRouter.post("/", usuarioController.login);
+// Essa rota é apenas para testar, você só consegue acessar ela se tiver enviando o Bearer Token que recebe no login
+let auth = new routesAuthentication();  // Middleware de autenticação
+usuarioRouter.get("/teste", auth.auth, (req, res) => {
+    res.status(200).send({ autenticado: true });
+});
+
 //Manter o singular?
 router.use("/api/esporte", esporteRouter);
 router.use("/api/equipe", equipeRouter);
 router.use("/api/campeonato", campeonatoRouter);
 router.use("/api/equipeCampeonato", equipeCampeonatoRouter);
+router.use("/api/login", usuarioRouter);
 
 export { router };
