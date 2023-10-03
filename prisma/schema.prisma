@@ -26,6 +26,7 @@ model Equipe {
   esporte          Esporte            @relation(fields: [id_esporte], references: [id])
   equipeCampeonato equipeCampeonato[]
   equipeUsuario    equipeUsuario[]
+  resultado        resultado[]
 
   @@map("equipes")
 }
@@ -48,6 +49,7 @@ model Campeonato {
   id_usuario            String
   esporte               Esporte            @relation(fields: [id_esporte], references: [id])
   equipeCampeonato      equipeCampeonato[]
+  resultado             resultado[]
 
   @@map("campeonatos")
 }
@@ -79,4 +81,15 @@ model Usuario {
   equipeUsuario equipeUsuario[]
 
   @@map("usuarios")
+}
+
+model resultado {
+  id            String     @id @default(uuid())
+  id_equipe     String
+  id_campeonato String
+  posicao       Int
+  equipe        Equipe     @relation(fields: [id_equipe], references: [id])
+  campeonato    Campeonato @relation(fields: [id_campeonato], references: [id])
+
+  @@map("resultados")
 }
