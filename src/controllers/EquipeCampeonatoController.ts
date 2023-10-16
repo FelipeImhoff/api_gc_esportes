@@ -121,4 +121,27 @@ export class EquipeCampeonatoController {
       .status(200)
       .json("Relacionamento entre equipe e campeonato deletada");
   }
+
+  async getCampeonatoByEquipe(request: Request, response: Response){
+    const { id_equipe } = request.params;
+    const data = await prismaClient.equipeCampeonato.findMany({
+      where: {
+        id_equipe
+      },
+      include: {
+        campeonato: {
+          include: {
+            esporte: true,
+          },
+        },
+        equipe: {
+          include: {
+            esporte: true,
+          },
+        },
+      },
+    })
+
+    return response.json(data);
+  }
 }

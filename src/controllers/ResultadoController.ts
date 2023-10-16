@@ -116,4 +116,17 @@ export class ResultadoController {
 
     return response.status(200).json('Resultado deletado')
   }
+
+  async filter(request: Request, response: Response) {
+    const query = request.body
+    const data = await prismaClient.resultado.findMany({
+      where: query,
+      include: {
+        equipe: true,
+        campeonato: true,
+      },
+    })
+
+    return response.json(data)
+  }
 }

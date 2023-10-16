@@ -31,7 +31,6 @@ model Equipe {
   @@map("equipes")
 }
 
-//Adicionar usuario depois de criar a tabela de usuários
 model Campeonato {
   id                    String             @id @default(uuid())
   nome                  String
