@@ -1,13 +1,30 @@
-import express from "express";
-import { router } from "./routes";
-import {internalErrors} from "./middlewares/errors/internal_errors";
+import express from 'express'
+import cors, { CorsOptions } from 'cors'
+import { router } from './routes'
+import { internalErrors } from './middlewares/errors/internal_errors'
 
-const app = express();
-const port = process.env.PORT || 3333;
+const app = express()
+const port = process.env.PORT || 3333
 
-app.use(express.json());
-app.use(router);
+const allowedOrigins = ['https://gc-esportes.web.app', 'http://localhost:3000']
 
-app.use(new internalErrors().syntaxError);
+const corsOptions: cors.CorsOptions = {
+  origin: (origin, callback) => {
+    if (allowedOrigins.indexOf(origin!) !== -1 || !origin) {
+      callback(null, true)
+    } else {
+      callback(new Error('Origem não permitida pelo CORS'))
+    }
+  },
+  methods: 'GET,POST',
+  allowedHeaders: 'Content-Type,Authorization',
+  exposedHeaders: 'Authorization',
+  credentials: true,
+}
+app.use(cors(corsOptions))
+app.use(express.json())
+app.use(router)
 
-app.listen(port, () => console.log(`Server is running on port ${port}!`));
+app.use(new internalErrors().syntaxError)
+
+app.listen(port, () => console.log(`Server is running on port ${port}!`))

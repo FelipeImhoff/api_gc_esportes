@@ -5,7 +5,6 @@ import { CampeonatoController } from './controllers/CampeonatoController'
 import { EquipeCampeonatoController } from './controllers/EquipeCampeonatoController'
 import { UsuarioController } from './controllers/UsuarioController'
 import { ResultadoController } from './controllers/ResultadoController'
-
 import { routesAuthentication } from './middlewares/authentication/routes_authentication'
 
 const router = Router()
@@ -24,6 +23,7 @@ esporteRouter.put('/:id', esporteController.update)
 esporteRouter.delete('/:id', esporteController.destroy)
 
 const equipeRouter = Router()
+equipeRouter.get('/usuario', equipeController.getEquipeByUsuario)
 equipeRouter.get('/', equipeController.index)
 equipeRouter.post('/', equipeController.store)
 equipeRouter.get('/:id', equipeController.show)
@@ -31,13 +31,16 @@ equipeRouter.put('/:id', equipeController.update)
 equipeRouter.delete('/:id', equipeController.destroy)
 
 const campeonatoRouter = Router()
+campeonatoRouter.get('/filtro', campeonatoController.filter)
 campeonatoRouter.get('/', campeonatoController.index)
 campeonatoRouter.post('/', campeonatoController.store)
 campeonatoRouter.get('/:id', campeonatoController.show)
 campeonatoRouter.put('/:id', campeonatoController.update)
 campeonatoRouter.delete('/:id', campeonatoController.destroy)
+campeonatoRouter.get('/esporte/:id_esporte', campeonatoController.getCampeonatoByEsporte)
 
 const resultadoRouter = Router()
+resultadoRouter.get('/filtro', resultadoController.filter)
 resultadoRouter.get('/', resultadoController.index)
 resultadoRouter.post('/', resultadoController.store)
 resultadoRouter.get('/:id', resultadoController.show)
@@ -50,6 +53,7 @@ equipeCampeonatoRouter.post('/', equipeCampeonatoController.store)
 equipeCampeonatoRouter.get('/:id', equipeCampeonatoController.show)
 equipeCampeonatoRouter.put('/:id', equipeCampeonatoController.update)
 equipeCampeonatoRouter.delete('/:id', equipeCampeonatoController.destroy)
+equipeCampeonatoRouter.get('/equipe/:id_equipe', equipeCampeonatoController.getCampeonatoByEquipe)
 
 // Criei as rotas de usuario
 const usuarioRouter = Router()
@@ -60,7 +64,6 @@ usuarioRouter.get('/teste', auth.auth, (req, res) => {
   res.status(200).send({ autenticado: true })
 })
 
-//Manter o singular?
 router.use('/api/esporte', esporteRouter)
 router.use('/api/equipe', equipeRouter)
 router.use('/api/campeonato', campeonatoRouter)
