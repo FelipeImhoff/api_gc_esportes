@@ -1,74 +1,90 @@
-import { Router } from 'express'
-import { EsporteController } from './controllers/EsporteController'
-import { EquipeController } from './controllers/EquipeController'
-import { CampeonatoController } from './controllers/CampeonatoController'
-import { EquipeCampeonatoController } from './controllers/EquipeCampeonatoController'
-import { UsuarioController } from './controllers/UsuarioController'
-import { ResultadoController } from './controllers/ResultadoController'
-import { routesAuthentication } from './middlewares/authentication/routes_authentication'
+import { Router } from 'express';
 
-const router = Router()
-const esporteController = new EsporteController()
-const equipeController = new EquipeController()
-const campeonatoController = new CampeonatoController()
-const equipeCampeonatoController = new EquipeCampeonatoController()
-const usuarioController = new UsuarioController()
-const resultadoController = new ResultadoController()
+import { EsporteController } from './controllers/EsporteController';
+import { EquipeController } from './controllers/EquipeController';
+import { CampeonatoController } from './controllers/CampeonatoController';
+import { UsuarioController } from './controllers/UsuarioController';
+import { ResultadoController } from './controllers/ResultadoController';
 
-const esporteRouter = Router()
-esporteRouter.get('/', esporteController.index)
-esporteRouter.post('/', esporteController.store)
-esporteRouter.get('/:id', esporteController.show)
-esporteRouter.put('/:id', esporteController.update)
-esporteRouter.delete('/:id', esporteController.destroy)
+import { routesAuthentication } from './middlewares/authentication/routes_authentication';
+import { validationBody, validationParams } from './middlewares/validation_middleware';
+import { creationUsuarioSchema, findUsuarioSchema } from './validations/usuario_validation';
+import { creationCampeonatoSchema, optionalCampeonatoSchema} from './validations/campeonato_validation';
+import { optionalEquipeSchema, creationEquipeSchema } from './validations/equipe_validation';
+import { optionalResultadoSchema, creationResultadoSchema, updateResultadoSchema } from './validations/resultado_validation';
 
-const equipeRouter = Router()
-equipeRouter.get('/usuario', equipeController.getEquipeByUsuario)
-equipeRouter.get('/', equipeController.index)
-equipeRouter.post('/', equipeController.store)
-equipeRouter.get('/:id', equipeController.show)
-equipeRouter.put('/:id', equipeController.update)
-equipeRouter.delete('/:id', equipeController.destroy)
+// Controllers
+const esporteController = new EsporteController();
+const equipeController = new EquipeController();
+const campeonatoController = new CampeonatoController();
+const usuarioController = new UsuarioController();
+const resultadoController = new ResultadoController();
+// Middleware de Autenticação
+const auth = new routesAuthentication();
 
-const campeonatoRouter = Router()
-campeonatoRouter.get('/filtro', campeonatoController.filter)
-campeonatoRouter.get('/', campeonatoController.index)
-campeonatoRouter.post('/', campeonatoController.store)
-campeonatoRouter.get('/:id', campeonatoController.show)
-campeonatoRouter.put('/:id', campeonatoController.update)
-campeonatoRouter.delete('/:id', campeonatoController.destroy)
-campeonatoRouter.get('/esporte/:id_esporte', campeonatoController.getCampeonatoByEsporte)
+// Rotas de Esporte
+const esporteRouter = Router();
+esporteRouter.get('/esportes', esporteController.index);  // Mostrar todos os Esportes
 
-const resultadoRouter = Router()
-resultadoRouter.get('/filtro', resultadoController.filter)
-resultadoRouter.get('/', resultadoController.index)
-resultadoRouter.post('/', resultadoController.store)
-resultadoRouter.get('/:id', resultadoController.show)
-resultadoRouter.put('/:id', resultadoController.update)
-resultadoRouter.delete('/:id', resultadoController.destroy)
+// Rotas de Equipe
+const equipeRouter = Router();
+// Mostrar pelo ID de Equipe
+equipeRouter.get('/equipe/:id', validationParams, equipeController.show);
+// Mostrar pelo ID de Usuario
+equipeRouter.get('/minhas-equipes', equipeController.showMy);
+// Mostrar utilizando filtro (Por padrão retorna todos os registros)
+equipeRouter.post('/equipes', validationBody(optionalEquipeSchema), equipeController.filter);
+// Cadastrar Equipe
+equipeRouter.post('/cadastrar-equipe', validationBody(creationEquipeSchema), equipeController.store);
+// Cadastrar Membro da Equipe por Email
+equipeRouter.put('/cadastrar-membro/:id', validationBody(findUsuarioSchema), equipeController.storeMembro);
+// Remover Membro da Equipe pelo Email
+equipeRouter.put('/remover-membro/:id', validationBody(findUsuarioSchema), equipeController.detroyMembro);
+// Atualizar Equipe
+equipeRouter.put('/equipe/:id', validationParams, validationBody(optionalEquipeSchema), equipeController.update);
+// Deletar Equipe
+equipeRouter.delete('/equipe/:id', validationParams, equipeController.destroy);
 
-const equipeCampeonatoRouter = Router()
-equipeCampeonatoRouter.get('/', equipeCampeonatoController.index)
-equipeCampeonatoRouter.post('/', equipeCampeonatoController.store)
-equipeCampeonatoRouter.get('/:id', equipeCampeonatoController.show)
-equipeCampeonatoRouter.put('/:id', equipeCampeonatoController.update)
-equipeCampeonatoRouter.delete('/:id', equipeCampeonatoController.destroy)
-equipeCampeonatoRouter.get('/equipe/:id_equipe', equipeCampeonatoController.getCampeonatoByEquipe)
+// Rotas de Campeonato
+const campeonatoRouter = Router();
+// Mostrar pelo ID de Campeonato
+campeonatoRouter.get('/campeonato/:id', validationParams, campeonatoController.show);
+// Mostrar pelo ID de Usuario
+campeonatoRouter.get('/meus-campeonatos', campeonatoController.showMy);
+// Mostrar utilizando filtro (Por padrão retorna todos os registros)
+campeonatoRouter.post('/campeonatos', validationBody(optionalCampeonatoSchema), campeonatoController.filter);
+// Cadastrar Campeonato
+campeonatoRouter.post('/cadastrar-campeonato', validationBody(creationCampeonatoSchema), campeonatoController.store);
+// Atualizar Campeonato
+campeonatoRouter.put('/campeonato/:id', validationParams, validationBody(optionalCampeonatoSchema), campeonatoController.update);
+// Deletar Campeonato
+campeonatoRouter.delete('/campeonato/:id', validationParams, campeonatoController.destroy);
 
-// Criei as rotas de usuario
-const usuarioRouter = Router()
-usuarioRouter.post('/', usuarioController.login)
-// Essa rota é apenas para testar, você só consegue acessar ela se tiver enviando o Bearer Token que recebe no login
-let auth = new routesAuthentication() // Middleware de autenticação
-usuarioRouter.get('/teste', auth.auth, (req, res) => {
-  res.status(200).send({ autenticado: true })
-})
+// Rotas de Resultado
+const resultadoRouter = Router();
+// Mostrar utilizando filtro (Por padrão retorna todos os registros)
+resultadoRouter.post('/resultados', validationBody(optionalResultadoSchema), resultadoController.filter);
+// Cadastrar Resultado
+resultadoRouter.post('/cadastrar-resultado', validationBody(creationResultadoSchema), resultadoController.store);
+// Atualizar Resultado
+resultadoRouter.put('/resultado/:id', validationParams, validationBody(updateResultadoSchema), resultadoController.update);
+// Deletar Resultado
+resultadoRouter.delete('/resultado/:id', validationParams, resultadoController.destroy);
 
-router.use('/api/esporte', esporteRouter)
-router.use('/api/equipe', equipeRouter)
-router.use('/api/campeonato', campeonatoRouter)
-router.use('/api/equipeCampeonato', equipeCampeonatoRouter)
-router.use('/api/login', usuarioRouter)
-router.use('/api/resultado', resultadoRouter)
+// Rotas do Usuario
+const usuarioRouter = Router();
+// Realizar Login
+usuarioRouter.post('/login', validationBody(creationUsuarioSchema), usuarioController.login);
+// Buscar por Email
+usuarioRouter.post('/usuarios', auth.auth, validationBody(findUsuarioSchema), usuarioController.show);
+// Teste de autenticação
+usuarioRouter.get('/login/teste', auth.auth, usuarioController.test);
 
-export { router }
+const router = Router();
+router.use('/api/', usuarioRouter);
+router.use('/api/', auth.auth, campeonatoRouter);
+router.use('/api/', auth.auth, equipeRouter);
+router.use('/api/', auth.auth, esporteRouter);
+router.use('/api/', auth.auth, resultadoRouter);
+
+export { router };

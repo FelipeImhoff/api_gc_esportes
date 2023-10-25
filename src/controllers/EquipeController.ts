@@ -1,104 +1,117 @@
-import { Request, Response } from 'express'
-import { prismaClient } from '../database/prismaClient'
-import jwt, { JwtPayload } from 'jsonwebtoken'
+import { Request, Response } from 'express';
+import { prismaError } from '../middlewares/errors/prisma_errors';
+import { EquipeRepository } from '../repositories/EquipeRepository';
 
 export class EquipeController {
-  async index(request: Request, response: Response) {
-    const data = await prismaClient.equipe.findMany({
-      include: {
-        esporte: true,
-      },
-    })
-
-    if (!data.length) {
-      return response.status(404).json('Nenhuma equipe encontrada')
+  async filter(request: Request, response: Response) {
+    try {
+      const repository = new EquipeRepository();
+      const equipe = await repository.filterEquipe(request.body);
+      response.status(200).send(equipe);
+    } catch (error) {
+      response.status(400).send(prismaError(error));
     }
-    return response.json(data)
   }
 
-  async store(request: Request, response: Response) {
-    const { nome, descricao, id_esporte, id_usuario } = request.body
-
-    if (!nome || !descricao || !id_esporte || !id_usuario) {
-      return response.status(400).json({
-        Erro: 'Parâmetros ausentes',
-        Mensagem: 'Alguns parâmetros obrigatórios estão ausentes na sua solicitação. Certifique-se de incluir todos os parâmetros necessários para a gravação de dados.',
-      })
+  async showMy(request: Request, response: Response) {
+    try {
+      const repository = new EquipeRepository();
+      const equipe = await repository.getMyEquipe(request.body._id);
+      response.status(200).send(equipe);
+    } catch (error) {
+      response.status(400).send(prismaError(error));
     }
-
-    const data = await prismaClient.equipe.create({
-      data: {
-        nome,
-        descricao,
-        id_esporte,
-        id_usuario,
-      },
-      include: {
-        esporte: true,
-      },
-    })
-
-    return response.status(201).json(data)
   }
 
   async show(request: Request, response: Response) {
-    const { id } = request.params
-    const data = await prismaClient.equipe.findUnique({
-      where: {
-        id,
-      },
-      include: {
-        esporte: true,
-      },
-    })
+    try {
+      const repository = new EquipeRepository();
+      const equipe = await repository.getById(Number(request.params.id));
 
-    return response.json(data)
+      if ('status' in equipe) {
+        response.status(400).send(equipe.message);
+      } else {
+        response.status(200).send(equipe);
+      }
+    } catch (error) {
+      response.status(400).send(prismaError(error));
+    }
+  }
+
+  async store(request: Request, response: Response) {
+    try {
+      const repository = new EquipeRepository();
+      const equipe = await repository.createEquipe(request.body);
+
+      if ('status' in equipe) {
+        response.status(400).send(equipe.message);
+      } else {
+        response.status(201).send(equipe);
+      }
+    } catch (error) {
+      response.status(400).send(prismaError(error));
+    }
+  }
+
+  async storeMembro(request: Request, response: Response) {
+    try {
+      const repository = new EquipeRepository();
+      const equipe = await repository.addMembro(
+        Number(request.params.id),
+        request.body,
+      );
+
+      if ('status' in equipe) {
+        response.status(400).send(equipe.message);
+      } else {
+        response.status(201).send(equipe);
+      }
+    } catch (error) {
+      response.status(400).send(prismaError(error));
+    }
+  }
+
+  async detroyMembro(request: Request, response: Response) {
+    try {
+      const repository = new EquipeRepository();
+      const equipe = await repository.removeMembro(
+        Number(request.params.id),
+        request.body,
+      );
+
+      if ('status' in equipe) {
+        response.status(400).send(equipe.message);
+      } else {
+        response.status(200).send(equipe);
+      }
+    } catch (error) {
+      response.status(400).send(prismaError(error));
+    }
   }
 
   async update(request: Request, response: Response) {
-    const { id } = request.params
-    const body = request.body
-
-    const data = await prismaClient.equipe.update({
-      where: {
-        id,
-      },
-      include: {
-        esporte: true,
-      },
-      data: body,
-    })
-
-    return response.json(data)
+    try {
+      const repository = new EquipeRepository();
+      const equipe = await repository.updateEquipe(
+        Number(request.params.id),
+        request.body,
+      );
+      response.status(200).send(equipe);
+    } catch (error) {
+      response.status(400).send(prismaError(error));
+    }
   }
 
   async destroy(request: Request, response: Response) {
-    const { id } = request.params
-    await prismaClient.equipe.delete({
-      where: {
-        id,
-      },
-    })
-
-    return response.status(200).json('Equipe deletada com sucesso')
-  }
-
-  async getEquipeByUsuario(request: Request, response: Response) {
-    const { authorization } = request.headers
-    const token: string | undefined = authorization?.split(' ')[1]
-    if (token) {
-      const { id_usuario } = jwt.verify(token, process.env.JWT_SECRET_TOKEN as string) as JwtPayload
-      const data = await prismaClient.equipe.findMany({
-        where: {
-          id_usuario,
-        },
-        include: {
-          esporte: true,
-        },
-      })
-      return response.json(data)
-    } else {
-      return response.json('Usuário não encontrado')
+    try {
+      const repository = new EquipeRepository();
+      const equipe = await repository.deleteEquipe(
+        Number(request.params.id),
+        request.body._id,
+      );
+      response.status(200).send(equipe);
+    } catch (error) {
+      response.status(400).send(prismaError(error));
     }
   }
 }
