@@ -1,132 +1,60 @@
-import { Request, Response } from 'express'
-import { prismaClient } from '../database/prismaClient'
+import { Request, Response } from 'express';
+import { prismaError } from '../middlewares/errors/prisma_errors';
+import { ResultadoRepository } from '../repositories/ResultadoRepository';
 
 export class ResultadoController {
-  async index(request: Request, response: Response) {
-    const data = await prismaClient.resultado.findMany({
-      include: {
-        campeonato: {
-          include: {
-            esporte: true,
-          },
-        },
-        equipe: {
-          include: {
-            esporte: true,
-          },
-        },
-      },
-    })
-
-    if (!data.length) {
-      return response.status(404).json('Nenhum resultado encontrado')
+  async filter(request: Request, response: Response) {
+    try {
+      const repository = new ResultadoRepository();
+      const resultado = await repository.filterResultado(request.body);
+      response.status(200).send(resultado);
+    } catch (error) {
+      response.status(400).send(prismaError(error));
     }
-    return response.json(data)
   }
 
   async store(request: Request, response: Response) {
-    const { id_equipe, id_campeonato, posicao } = request.body
+    try {
+      const repository = new ResultadoRepository();
+      const resultado = await repository.createResultado(request.body);
 
-    if (!id_equipe || !id_campeonato || !posicao) {
-      return response.status(400).json({
-        Erro: 'Parâmetros ausentes',
-        Mensagem: 'Alguns parâmetros obrigatórios estão ausentes na sua solicitação. Certifique-se de incluir todos os parâmetros necessários para a gravação de dados.',
-      })
+      if ('status' in resultado) {
+        response.status(400).send(resultado.message);
+      } else {
+        response.status(201).send(resultado);
+      }
+    } catch (error) {
+      response.status(400).send(prismaError(error));
     }
-
-    const data = await prismaClient.resultado.create({
-      data: {
-        id_campeonato,
-        id_equipe,
-        posicao,
-      },
-      include: {
-        campeonato: {
-          include: {
-            esporte: true,
-          },
-        },
-        equipe: {
-          include: {
-            esporte: true,
-          },
-        },
-      },
-    })
-
-    return response.status(201).json(data)
-  }
-
-  async show(request: Request, response: Response) {
-    const { id } = request.params
-    const data = await prismaClient.resultado.findUnique({
-      where: {
-        id,
-      },
-      include: {
-        campeonato: {
-          include: {
-            esporte: true,
-          },
-        },
-        equipe: {
-          include: {
-            esporte: true,
-          },
-        },
-      },
-    })
-
-    return response.json(data)
   }
 
   async update(request: Request, response: Response) {
-    const { id } = request.params
-    const body = request.body
-
-    const data = await prismaClient.resultado.update({
-      where: {
-        id,
-      },
-      include: {
-        campeonato: {
-          include: {
-            esporte: true,
-          },
-        },
-        equipe: {
-          include: {
-            esporte: true,
-          },
-        },
-      },
-      data: body,
-    })
-
-    return response.json(data)
+    try {
+      const repository = new ResultadoRepository();
+      const resultado = await repository.updateResultado(
+        Number(request.params.id),
+        request.body,
+      );
+      if ('status' in resultado) {
+        response.status(400).send(resultado.message);
+      } else {
+        response.status(200).send(resultado);
+      }
+    } catch (error) {
+      response.status(400).send(prismaError(error));
+    }
   }
 
   async destroy(request: Request, response: Response) {
-    const { id } = request.params
-    await prismaClient.resultado.delete({
-      where: {
-        id,
-      },
-    })
-
-    return response.status(200).json('Resultado deletado')
-  }
-
-  async filter(request: Request, response: Response) {
-    const query = request.body
-    const data = await prismaClient.resultado.findMany({
-      where: query,
-      include: {
-        equipe: true,
-        campeonato: true,
-      },
-    })
-
-    return response.json(data)
+    try {
+      const repository = new ResultadoRepository();
+      const resultado = await repository.deleteResultado(
+        Number(request.params.id),
+        request.body._id,
+      );
+      response.status(200).send(resultado);
+    } catch (error) {
+      response.status(400).send(prismaError(error));
+    }
   }
 }

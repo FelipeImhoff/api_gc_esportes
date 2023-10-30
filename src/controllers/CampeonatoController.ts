@@ -1,112 +1,76 @@
-import { Request, Response } from 'express'
-import { prismaClient } from '../database/prismaClient'
-
-interface CampeonatoData {
-  nome: string
-  descricao: string
-  legenda: string
-  id_esporte: string
-  total_atletas_equipes: number
-  total_equipes: number
-  data_inicio_inscricao: string
-  data_final_inscricao: string
-  horario: string
-  endereco: string
-  bairro: string
-  cidade: string
-  id_usuario: string
-}
+import { Request, Response } from 'express';
+import { prismaError } from '../middlewares/errors/prisma_errors';
+import { CampeonatoRepository } from '../repositories/CampeonatoRepository';
 
 export class CampeonatoController {
-  async index(request: Request, response: Response) {
-    const data = await prismaClient.campeonato.findMany()
-
-    if (!data.length) {
-      return response.status(404).json('Nenhum campeonato encontrado')
+  async filter(request: Request, response: Response) {
+    try {
+      const repository = new CampeonatoRepository();
+      const campeonato = await repository.filterCampeonato(request.body);
+      response.status(200).send(campeonato);
+    } catch (error) {
+      response.status(400).send(prismaError(error));
     }
-    return response.json(data)
   }
 
-  async store(request: Request, response: Response) {
-    const campeonatoData: CampeonatoData = request.body
-    campeonatoData.data_final_inscricao = new Date(campeonatoData.data_final_inscricao).toISOString()
-    campeonatoData.data_inicio_inscricao = new Date(campeonatoData.data_inicio_inscricao).toISOString()
-
-    for (const valor of Object.values(campeonatoData)) {
-      if (valor === '' || valor === null || valor === undefined) {
-        return response.status(400).json({
-          Erro: 'Parâmetros ausentes',
-          Mensagem: 'Alguns parâmetros obrigatórios estão ausentes na sua solicitação. Certifique-se de incluir todos os parâmetros necessários para a gravação de dados.',
-        })
-      }
+  async showMy(request: Request, response: Response) {
+    try {
+      const repository = new CampeonatoRepository();
+      const campeonato = await repository.getMyCampeonato(request.body._id);
+      response.status(200).send(campeonato);
+    } catch (error) {
+      response.status(400).send(prismaError(error));
     }
-
-    const data = await prismaClient.campeonato.create({
-      data: campeonatoData,
-    })
-
-    return response.status(201).json(data)
   }
 
   async show(request: Request, response: Response) {
-    const { id } = request.params
-    const data = await prismaClient.campeonato.findUnique({
-      where: {
-        id,
-      },
-    })
+    try {
+      const repository = new CampeonatoRepository();
+      const campeonato = await repository.getById(Number(request.params.id));
 
-    return response.json(data)
+      if ('status' in campeonato) {
+        response.status(400).send(campeonato.message);
+      } else {
+        response.status(200).send(campeonato);
+      }
+    } catch (error) {
+      response.status(400).send(prismaError(error));
+    }
+  }
+
+  async store(request: Request, response: Response) {
+    try {
+      const repository = new CampeonatoRepository();
+      const campeonato = await repository.createCampeonato(request.body);
+      response.status(201).send(campeonato);
+    } catch (error) {
+      response.status(400).send(prismaError(error));
+    }
   }
 
   async update(request: Request, response: Response) {
-    const { id } = request.params
-    const body = request.body
-
-    const data = await prismaClient.campeonato.update({
-      where: {
-        id,
-      },
-      data: body,
-    })
-
-    return response.json(data)
+    try {
+      const repository = new CampeonatoRepository();
+      const campeonato = await repository.updateCampeonato(
+        Number(request.params.id),
+        request.body,
+      );
+      response.status(200).send(campeonato);
+    } catch (error) {
+      response.status(400).send(prismaError(error));
+    }
   }
 
   async destroy(request: Request, response: Response) {
-    const { id } = request.params
-    await prismaClient.campeonato.delete({
-      where: {
-        id,
-      },
-    })
-
-    return response.status(200).json('Campeonato deletado com sucesso')
-  }
-
-  async getCampeonatoByEsporte(request: Request, response: Response) {
-    const { id_esporte } = request.params
-    const data = await prismaClient.campeonato.findMany({
-      where: {
-        id_esporte,
-      },
-      include: {
-        esporte: true,
-      },
-    })
-
-    return response.json(data)
-  }
-
-  async filter(request: Request, response: Response) {
-    const query = request.body
-    const data = await prismaClient.campeonato.findMany({
-      where: query,
-      include: {
-        esporte: true,
-      },
-    })
-
-    return response.json(data)
+    try {
+      const repository = new CampeonatoRepository();
+      const campeonato = await repository.deleteCampeonato(
+        Number(request.params.id),
+        request.body._id,
+      );
+      response.status(200).send(campeonato);
+    } catch (error) {
+      response.status(400).send(prismaError(error));
+    }
   }
 }
