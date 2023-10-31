@@ -22098,12 +22098,15 @@ async function main() {
 
   const esportes = [
     {
+      id: 1,
       nome: 'Futebol',
     },
     {
+      id: 2,
       nome: 'Basquete',
     },
     {
+      id: 3,
       nome: 'Vôlei',
     },
   ];
