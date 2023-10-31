@@ -1,6 +1,7 @@
 import { Router } from 'express';
 
 import { EsporteController } from './controllers/EsporteController';
+import { CidadeController } from './controllers/CidadeController';
 import { EquipeController } from './controllers/EquipeController';
 import { CampeonatoController } from './controllers/CampeonatoController';
 import { UsuarioController } from './controllers/UsuarioController';
@@ -15,6 +16,7 @@ import { optionalResultadoSchema, creationResultadoSchema, updateResultadoSchema
 
 // Controllers
 const esporteController = new EsporteController();
+const cidadeController = new CidadeController();
 const equipeController = new EquipeController();
 const campeonatoController = new CampeonatoController();
 const usuarioController = new UsuarioController();
@@ -25,6 +27,10 @@ const auth = new routesAuthentication();
 // Rotas de Esporte
 const esporteRouter = Router();
 esporteRouter.get('/esportes', esporteController.index);  // Mostrar todos os Esportes
+
+// Rotas de Cidade
+const cidadeRouter = Router();
+cidadeRouter.get('/cidades', cidadeController.index);  // Mostrar todos as Cidades
 
 // Rotas de Equipe
 const equipeRouter = Router();
@@ -84,6 +90,7 @@ const router = Router();
 router.use('/api/', usuarioRouter);
 router.use('/api/', auth.auth, campeonatoRouter);
 router.use('/api/', auth.auth, equipeRouter);
+router.use('/api/', auth.auth, cidadeRouter);
 router.use('/api/', auth.auth, esporteRouter);
 router.use('/api/', auth.auth, resultadoRouter);
 

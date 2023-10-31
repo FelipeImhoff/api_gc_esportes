@@ -19,7 +19,7 @@ export class UsuarioController {
           { id: userCreated.id },
           process.env.JWT_SECRET_TOKEN as string,
           {
-            expiresIn: '7days',
+            expiresIn: '7d',
           },
         );
 
@@ -36,7 +36,7 @@ export class UsuarioController {
           { id: user.id },
           process.env.JWT_SECRET_TOKEN as string,
           {
-            expiresIn: '7days',
+            expiresIn: '7d',
           },
         );
 
