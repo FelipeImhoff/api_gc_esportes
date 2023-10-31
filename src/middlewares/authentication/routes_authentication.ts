@@ -13,13 +13,15 @@ export class routesAuthentication {
       const { authorization } = req.headers;
 
       if (!authorization) {
+        console.log('Error Autenticação: Não foi encontrado token');
         throw new Error();
       } else {
-        if (process.env.API_AUTH_DEBUG == 'TRUE') {
+        if (process.env.API_AUTH_DEBUG !== 'FALSE') {
           req.body._id = 1;
           next();
         } else {
           const token = authorization.split(' ')[1];
+
           const { id } = jwt.verify(
             token,
             process.env.JWT_SECRET_TOKEN as string,
@@ -29,6 +31,7 @@ export class routesAuthentication {
           req.body._id = id;
 
           if (!user) {
+            console.log('Error Autenticação: Não foi encontrado usuario');
             throw new Error();
           } else {
             next();
