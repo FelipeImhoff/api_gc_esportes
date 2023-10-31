@@ -22108,11 +22108,11 @@ async function main() {
     },
   ];
 
-  // Exclui a tabela se ela já existir
+  // Exclui as tabelas se ela já existir
   await prisma.cidade.deleteMany({});
   await prisma.esporte.deleteMany({});
 
-  // Cria a tabela com os dados fixos
+  // Cria as tabelas com os dados fixos
   await prisma.cidade.createMany({
     data: cidades,
   });
@@ -22120,7 +22120,7 @@ async function main() {
     data: esportes,
   });
 
-  console.log('Tabela cidades criada com dados fixos.');
+  console.log('Tabelas de cidades e esportes criadas com dados fixos.');
 }
 
 main()
