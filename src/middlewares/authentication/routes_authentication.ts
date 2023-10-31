@@ -13,7 +13,7 @@ export class routesAuthentication {
       const { authorization } = req.headers;
 
       if (!authorization) {
-        console.log('Error Autenticação: Não foi encontrado token');
+        console.log('Erro Autenticação: Não foi encontrado token');
         throw new Error();
       } else {
         if (process.env.API_AUTH_DEBUG !== 'FALSE') {
@@ -31,7 +31,7 @@ export class routesAuthentication {
           req.body._id = id;
 
           if (!user) {
-            console.log('Error Autenticação: Não foi encontrado usuario');
+            console.log('Erro Autenticação: Não foi encontrado usuario');
             throw new Error();
           } else {
             next();
